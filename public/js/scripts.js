@@ -13,20 +13,52 @@ const drawHandler = (username) => {
   helloStrangerElement.innerHTML = `Hello ${username}`;
 };
 
+const drawNewChat = (message) => {
+  const wrapperChatBox = document.createElement('div');
+  const chatBox = `
+    <div>
+      ${message}
+    </div>
+  `;
+
+  wrapperChatBox.innerHTML = chatBox;
+  chattingBoxElement.append(wrapperChatBox);
+};
+
 // on을 통해 emit를 받기
 socket.on('user_connected', (username) => {
-  console.log(username, 'connected');
+  drawNewChat(`${username} connected`);
 });
+socket.on('new_chat', (data) => {
+  const { chat, username } = data;
+  drawNewChat(`${username} : ${chat}`);
+});
+
+// event handler
+const handleSubmit = (event) => {
+  event.preventDefault();
+
+  //input값 가져오기
+  const inputValue = event.target.elements[0].value;
+  //보내기
+  if (inputValue !== '') {
+    socket.emit('submit_chat', inputValue);
+    drawNewChat(`me : ${inputValue}`);
+    event.target.elements[0].value = '';
+  }
+};
 
 function helloUser() {
   const username = prompt('당신의 이름은');
   socket.emit('new_user', username, (data) => {
-    drawHandler(data);
-  }); //3번째 Callback은 return의 값이 들어온다
+    drawHandler(`Hello ${data}`);
+  });
 }
 
 function init() {
   helloUser();
+  //이벤트 연결
+  formElement.addEventListener('submit', handleSubmit);
 }
 
 init();
