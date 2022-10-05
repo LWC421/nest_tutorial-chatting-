@@ -31,14 +31,14 @@ export class ChatsGateway
     this.logger.log(`Disconnected : ${socket.id} ${socket.nsp.name}`);
   }
 
-  @SubscribeMessage('new_user') //해당 emit이 들어오면 처리해준다
+  //해당 emit이 들어오면 처리해준다
+  @SubscribeMessage('new_user')
   handleNewUser(
     @MessageBody() username: string,
     @ConnectedSocket() socket: Socket,
   ) {
-    console.log(socket.id);
-    console.log(username);
-    socket.emit('hello_user', `hello ${username}`);
-    return 'Return value';
+    //broadcast를 통해 브로드캐스팅
+    socket.broadcast.emit('user_connected', username);
+    return username;
   }
 }
